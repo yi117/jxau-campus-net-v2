@@ -1,4 +1,4 @@
-﻿# 江农校园网守卫（jxau-campus-net）
+﻿# jxau-campus-net
 
 江西农业大学校园网（锐捷 ePortal）的自动认证与断线自愈脚本。
 
