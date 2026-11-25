@@ -1,0 +1,17 @@
+# 运行时数据，绝对不能提交
+credential.dat
+state.json
+wifi-backup.json
+
+# 日志
+*.log
+*.log.1
+
+# 临时文件
+*.tmp
+*.dmp
+
+# 编译产物与发布包（二进制走 GitHub Releases，不进仓库）
+GuardUI.exe
+*.zip
+release-notes-*.md
