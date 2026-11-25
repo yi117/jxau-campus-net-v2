@@ -27,7 +27,7 @@
 
 ## 快速开始（图形界面）
 
-**下载**：到本仓库右侧 [Releases](https://github.com/yi117/jxau-campus-net/releases/latest) 下载 `jxau-campus-net-v*-win.zip`，解压即用。
+**下载**：到本仓库右侧 [Releases](https://github.com/yi117/jxau-campus-net-v2/releases/latest) 下载 `jxau-campus-net-v*-win.zip`，解压即用。
 
 解压后**双击 `GuardUI.exe`**，按三步走：
 
