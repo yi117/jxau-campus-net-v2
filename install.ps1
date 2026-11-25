@@ -20,7 +20,8 @@ param(
     [string]$Owner = '',
     [string]$RuntimeDir = '',
     [switch]$SkipPrompt,
-    [switch]$NonInteractive
+    [switch]$NonInteractive,
+    [switch]$NoPortalPolicy
 )
 
 $ErrorActionPreference = 'Stop'
@@ -240,6 +241,24 @@ try {
 }
 if ($registered) {
     Write-Host ("守护脚本：{0}" -f $guardPath)
+}
+
+# ---- 关掉"连上需要登录的网络就自动打开浏览器"
+# 开机那几十秒守护进程还没登好，Windows 的强制门户检测会抢先拉起浏览器。
+# 这两个策略只拦"自动打开浏览器"这一个动作，通知和手动打开认证页都不受影响。
+if (-not $NoPortalPolicy) {
+    $wcmKey  = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy'
+    $ncsiKey = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkConnectivityStatusIndicator'
+    try {
+        if (-not (Test-Path -LiteralPath $wcmKey)) { New-Item -Path $wcmKey -Force | Out-Null }
+        New-ItemProperty -LiteralPath $wcmKey -Name 'fBlockWebBrowserLaunch' -Value 1 -PropertyType DWord -Force | Out-Null
+        if (-not (Test-Path -LiteralPath $ncsiKey)) { New-Item -Path $ncsiKey -Force | Out-Null }
+        New-ItemProperty -LiteralPath $ncsiKey -Name 'NoWebBrowserLaunch' -Value 1 -PropertyType DWord -Force | Out-Null
+        Write-Host '已关闭开机自动弹认证页（Windows 不会再自己拉起浏览器）' -ForegroundColor Green
+    } catch {
+        Write-Host ("关闭自动弹认证页失败：{0}" -f $_.Exception.Message) -ForegroundColor Yellow
+        Write-Host '可以稍后手动双击 no-portal-popup.cmd。'
+    }
 }
 
 Start-ScheduledTask -TaskName $taskName

@@ -1,4 +1,4 @@
-﻿# jxau-campus-net
+﻿# 江农校园网守卫（jxau-campus-net）
 
 江西农业大学校园网（锐捷 ePortal）的自动认证与断线自愈脚本。
 
@@ -40,7 +40,7 @@
 > 界面和脚本必须在**同一个文件夹**里。如果你想分开存，点界面里的「指定脚本目录…」，
 > 选中 `guard.ps1` 所在目录即可。
 
-不想用界面、只想要命令行？下面是v1原来的方式，两者用的是同一套脚本。
+不想用界面、只想要命令行？下面是原来的方式，两者用的是同一套脚本。
 
 ---
 
@@ -175,7 +175,19 @@ D:\campus-net
 | 目录 `%LOCALAPPDATA%\CampusNetGuard\` | 放加密凭据、配置、日志、状态 | `uninstall.cmd` |
 | 网卡"允许关闭以节约电源" | 仅 `tune-wifi.cmd` 改过才有 | `tune-wifi.cmd -Revert` |
 | 电源计划"无线适配器节能模式" | 仅 `tune-wifi.cmd` 改过才有 | 同上 |
-| 两个 HKLM 策略键 | 仅 `no-portal-popup.cmd` 改过才有，用于禁止自动打开浏览器 | `no-portal-popup.cmd -Revert` |
+| 两个 HKLM 策略键（禁止自动打开浏览器） | **安装时自动写入**，见下 | `uninstall.cmd` 自动还原 |
+
+安装时写入的两个策略键，用来阻止"开机时 Windows 抢在守护进程前面拉起浏览器打开认证页"：
+
+```
+HKLM\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy
+    fBlockWebBrowserLaunch = 1
+HKLM\SOFTWARE\Policies\Microsoft\Windows\NetworkConnectivityStatusIndicator
+    NoWebBrowserLaunch = 1
+```
+
+它只拦"自动打开浏览器"这一个动作——网络图标照样提示"需要登录"，你手动打开认证页也不受影响。
+不想让它写，安装时加 `-NoPortalPolicy`；想单独还原用 `no-portal-popup.cmd -Revert`。
 
 除此之外**不动任何系统设置**：不装驱动、不改 hosts、不改 DNS、不动防火墙、不碰系统代理。
 

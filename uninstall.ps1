@@ -53,6 +53,25 @@ try {
     Write-Host ("没有找到计划任务 {0}（可能已经删过了）" -f $taskName)
 }
 
+# ---- 还原"禁止开机自动弹认证页"的策略
+$wcmKey  = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WcmSvc\GroupPolicy'
+$ncsiKey = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\NetworkConnectivityStatusIndicator'
+$policyReverted = $false
+foreach ($pair in @(
+        @{ Key = $wcmKey;  Name = 'fBlockWebBrowserLaunch' },
+        @{ Key = $ncsiKey; Name = 'NoWebBrowserLaunch' })) {
+    if (Test-Path -LiteralPath $pair.Key) {
+        $existing = Get-ItemProperty -LiteralPath $pair.Key -Name $pair.Name -ErrorAction SilentlyContinue
+        if ($null -ne $existing) {
+            Remove-ItemProperty -LiteralPath $pair.Key -Name $pair.Name -ErrorAction SilentlyContinue
+            $policyReverted = $true
+        }
+    }
+}
+if ($policyReverted) {
+    Write-Host '已还原：Windows 会恢复"连上需要登录的网络就自动打开浏览器"。' -ForegroundColor Green
+}
+
 # ---- 还原网卡设置
 $tuneScript = Join-Path $here 'tune-wifi.ps1'
 $backup = Join-Path $runtime 'wifi-backup.json'
