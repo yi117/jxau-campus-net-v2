@@ -90,9 +90,13 @@ namespace JxauGuardUI
         private Dictionary<string, object> _uiConfig;
 
         private TextBlock _txtPhase, _txtMessage, _txtRun, _txtUserIndex, _txtLogins, _txtBudget, _txtFooter, _txtAccount, _txtAutoStart, _txtScript;
-        private TextBlock _txtHead;
-        private TextBox _txtLog, _txtTitle;
-        private Button _btnStart, _btnPause, _btnRestart, _btnOpenLog, _btnUninstall, _btnPickBg, _btnResetBg, _btnClearLog, _btnEditCred, _btnInstall, _btnPickScript;
+        private TextBlock _txtHead, _txtCredState, _txtAutoStartDetail, _txtScriptDetail, _txtTimeoutHint, _txtBackground, _txtAboutPaths;
+        private TextBox _txtLog, _txtLogPreview, _txtUser, _txtTimeout, _txtTitle;
+        private PasswordBox _pwdMain, _pwdConfirm;
+        private Button _btnStart, _btnPause, _btnRestart, _btnSaveCred, _btnInstall, _btnPickScript;
+        private Button _btnSaveTimeout, _btnSaveTitle, _btnPickBg, _btnResetBg, _btnOpenLog, _btnClearLog, _btnUninstall;
+        private Button _navOverview, _navAccount, _navSettings, _navLogs, _navAbout;
+        private Grid _pageOverview, _pageAccount, _pageSettings, _pageLogs, _pageAbout;
         private Rectangle _bgImage, _bgOverlay;
         private Brush _defaultBgBrush;
         private string _currentBgPath;
@@ -163,54 +167,109 @@ namespace JxauGuardUI
             _txtLogins = Find<TextBlock>("TxtLogins");
             _txtBudget = Find<TextBlock>("TxtBudget");
             _txtFooter = Find<TextBlock>("TxtFooter");
-            _txtLog = Find<TextBox>("TxtLog");
             _txtHead = Find<TextBlock>("TxtHead");
+            _txtAccount = Find<TextBlock>("TxtAccount");
+            _txtAutoStart = Find<TextBlock>("TxtAutoStart");
+            _txtScript = Find<TextBlock>("TxtScript");
+            _txtCredState = Find<TextBlock>("TxtCredState");
+            _txtAutoStartDetail = Find<TextBlock>("TxtAutoStartDetail");
+            _txtScriptDetail = Find<TextBlock>("TxtScriptDetail");
+            _txtTimeoutHint = Find<TextBlock>("TxtTimeoutHint");
+            _txtBackground = Find<TextBlock>("TxtBackground");
+            _txtAboutPaths = Find<TextBlock>("TxtAboutPaths");
+
+            _txtLog = Find<TextBox>("TxtLog");
+            _txtLogPreview = Find<TextBox>("TxtLogPreview");
+            _txtUser = Find<TextBox>("TxtUser");
+            _txtTimeout = Find<TextBox>("TxtTimeout");
             _txtTitle = Find<TextBox>("TxtTitle");
+            _pwdMain = Find<PasswordBox>("PwdMain");
+            _pwdConfirm = Find<PasswordBox>("PwdConfirm");
 
             _btnStart = Find<Button>("BtnStart");
             _btnPause = Find<Button>("BtnPause");
             _btnRestart = Find<Button>("BtnRestart");
-            _btnOpenLog = Find<Button>("BtnOpenLog");
-            _btnUninstall = Find<Button>("BtnUninstall");
-            _btnPickBg = Find<Button>("BtnPickBg");
-            _btnResetBg = Find<Button>("BtnResetBg");
-            _btnClearLog = Find<Button>("BtnClearLog");
-            _btnEditCred = Find<Button>("BtnEditCred");
+            _btnSaveCred = Find<Button>("BtnSaveCred");
             _btnInstall = Find<Button>("BtnInstall");
             _btnPickScript = Find<Button>("BtnPickScript");
-            _txtAccount = Find<TextBlock>("TxtAccount");
-            _txtAutoStart = Find<TextBlock>("TxtAutoStart");
-            _txtScript = Find<TextBlock>("TxtScript");
+            _btnSaveTimeout = Find<Button>("BtnSaveTimeout");
+            _btnSaveTitle = Find<Button>("BtnSaveTitle");
+            _btnPickBg = Find<Button>("BtnPickBg");
+            _btnResetBg = Find<Button>("BtnResetBg");
+            _btnOpenLog = Find<Button>("BtnOpenLog");
+            _btnClearLog = Find<Button>("BtnClearLog");
+            _btnUninstall = Find<Button>("BtnUninstall");
+
+            _navOverview = Find<Button>("NavOverview");
+            _navAccount = Find<Button>("NavAccount");
+            _navSettings = Find<Button>("NavSettings");
+            _navLogs = Find<Button>("NavLogs");
+            _navAbout = Find<Button>("NavAbout");
+            _pageOverview = Find<Grid>("PageOverview");
+            _pageAccount = Find<Grid>("PageAccount");
+            _pageSettings = Find<Grid>("PageSettings");
+            _pageLogs = Find<Grid>("PageLogs");
+            _pageAbout = Find<Grid>("PageAbout");
 
             _bgImage = Find<Rectangle>("BgImage");
             _bgOverlay = Find<Rectangle>("BgOverlay");
             _defaultBgBrush = _bgImage.Fill;
 
+            _navOverview.Click += (s, e) => SetPage(_pageOverview, _navOverview);
+            _navAccount.Click += (s, e) => SetPage(_pageAccount, _navAccount);
+            _navSettings.Click += (s, e) => SetPage(_pageSettings, _navSettings);
+            _navLogs.Click += (s, e) => SetPage(_pageLogs, _navLogs);
+            _navAbout.Click += (s, e) => SetPage(_pageAbout, _navAbout);
+
             _btnStart.Click += (s, e) => StartGuard();
             _btnPause.Click += (s, e) => PauseGuard();
             _btnRestart.Click += (s, e) => RestartGuard();
-            _btnOpenLog.Click += (s, e) => OpenLogFolder();
-            _btnUninstall.Click += (s, e) => RunUninstall();
-            _btnClearLog.Click += (s, e) => ClearLogs();
-            _btnEditCred.Click += (s, e) => EditCredentials();
+            _btnSaveCred.Click += (s, e) => SaveCredentialsInline();
             _btnInstall.Click += (s, e) => InstallAutoStart();
             _btnPickScript.Click += (s, e) => PickScriptDir();
-            _btnPickBg.Click += (s, e) => PickBackground();
-            _btnResetBg.Click += (s, e) => ResetBackground();
-            _txtTitle.LostFocus += (s, e) => ApplyTitleFromBox();
-            _txtTitle.KeyDown += (s, e) =>
-            {
-                if (e.Key == Key.Enter)
-                {
-                    ApplyTitleFromBox();
-                    Keyboard.ClearFocus();
-                }
-            };
+            _btnSaveTimeout.Click += (s, e) => SaveTimeoutInline();
+            _btnSaveTitle.Click += (s, e) => SaveTitleInline();
+            _btnPickBg.Click += (s, e) => PickBackgroundInline();
+            _btnResetBg.Click += (s, e) => ResetBackgroundInline();
+            _btnOpenLog.Click += (s, e) => OpenLogFolder();
+            _btnClearLog.Click += (s, e) => ClearLogs();
+            _btnUninstall.Click += (s, e) => RunUninstall();
+
+            _txtTimeout.TextChanged += (s, e) => UpdateTimeoutHint();
 
             _txtFooter.Text = "脚本目录：" + _scriptDir + "    ·    数据目录：" + _runtimeDir;
+            _txtAboutPaths.Text = "脚本目录\n  " + _scriptDir + "\n\n数据目录\n  " + _runtimeDir;
 
-            // 直接关窗口时 LostFocus 不一定触发，这里再存一次标题
-            Window.Closing += (s, e) => ApplyTitleFromBox();
+            SetPage(_pageOverview, _navOverview);
+            LoadSettingsIntoUi();
+        }
+
+        // ---------------------------------------------------------------- 页面切换
+
+        private void SetPage(Grid page, Button nav)
+        {
+            var pages = new[] { _pageOverview, _pageAccount, _pageSettings, _pageLogs, _pageAbout };
+            var navs = new[] { _navOverview, _navAccount, _navSettings, _navLogs, _navAbout };
+
+            for (int i = 0; i < pages.Length; i++)
+            {
+                bool active = ReferenceEquals(pages[i], page);
+                pages[i].Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+
+                Button b = navs[i];
+                if (active)
+                {
+                    b.Background = new SolidColorBrush(Color.FromRgb(0x3D, 0x7B, 0xFA));
+                    b.Foreground = Brushes.White;
+                    b.FontWeight = FontWeights.SemiBold;
+                }
+                else
+                {
+                    b.Background = Brushes.Transparent;
+                    b.Foreground = new SolidColorBrush(Color.FromRgb(0x33, 0x41, 0x55));
+                    b.FontWeight = FontWeights.Normal;
+                }
+            }
         }
 
         private T Find<T>(string name) where T : class
@@ -301,16 +360,17 @@ namespace JxauGuardUI
 
             _txtBudget.Text = BuildBudgetText(state);
 
+            // 先算脚本目录是否可用，下面的按钮/菜单状态要用到
+            RefreshScriptStatus();
+
             _btnStart.IsEnabled = _scriptOk && (paused || !running);
             _btnPause.IsEnabled = !paused;
             _btnRestart.IsEnabled = _scriptOk;
-            _btnClearLog.IsEnabled = true;
-            _btnUninstall.IsEnabled = _scriptOk && File.Exists(Path.Combine(_scriptDir, "uninstall.cmd"));
+
 
             RefreshLog();
             RefreshAccount();
             RefreshAutoStart();
-            RefreshScriptStatus();
         }
 
         private string BuildBudgetText(Dictionary<string, object> state)
@@ -322,6 +382,7 @@ namespace JxauGuardUI
             DateTime started;
             if (!DateTime.TryParse(since, out started)) return "";
             int window = ReadReconnectWindowSec();
+            if (window <= 0) return "重连预算：不限制（会一直重试）";
             double left = window - (DateTime.Now - started).TotalSeconds;
             if (left < 0) left = 0;
             return "重连预算：剩 " + (int)left + " 秒";
@@ -333,12 +394,232 @@ namespace JxauGuardUI
             {
                 if (!File.Exists(_configPath)) return KeepaliveWindowFallbackSec;
                 var cfg = Deserialize(File.ReadAllText(_configPath, Encoding.UTF8));
+                if (cfg == null || !cfg.ContainsKey("reconnectWindowSec")) return KeepaliveWindowFallbackSec;
                 int v = ToInt(cfg, "reconnectWindowSec");
-                return v > 0 ? v : KeepaliveWindowFallbackSec;
+                return v < 0 ? 0 : v;
             }
             catch
             {
                 return KeepaliveWindowFallbackSec;
+            }
+        }
+
+        private void SaveReconnectSeconds(int minutes)
+        {
+            Dictionary<string, object> cfg;
+            if (File.Exists(_configPath))
+            {
+                cfg = Deserialize(File.ReadAllText(_configPath, Encoding.UTF8))
+                      ?? new Dictionary<string, object>();
+            }
+            else
+            {
+                cfg = new Dictionary<string, object>();
+            }
+
+            cfg["reconnectWindowSec"] = minutes * 60;
+            Directory.CreateDirectory(_runtimeDir);
+            File.WriteAllText(_configPath,
+                new JavaScriptSerializer().Serialize(cfg), new UTF8Encoding(false));
+        }
+
+        private void SaveTimeoutInline()
+        {
+            int minutes;
+            if (!int.TryParse((_txtTimeout.Text ?? "").Trim(), out minutes) || minutes < 0 || minutes > 1440)
+            {
+                MessageBox.Show(Window,
+                    "请填 0 到 1440 之间的整数（分钟）。\n\n0 = 不限制：掉线后会一直尝试，直到连上或你手动暂停。",
+                    "重连超时", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _txtTimeout.Focus();
+                return;
+            }
+
+            try
+            {
+                SaveReconnectSeconds(minutes);
+                Refresh();
+                MessageBox.Show(Window, "已保存。下一轮巡检生效（最多 30 秒），不用重启守护进程。",
+                    "重连超时", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(Window, "保存失败：" + ex.Message, "重连超时",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void UpdateTimeoutHint()
+        {
+            int currentSec = ReadReconnectWindowSec();
+            string currentText = currentSec <= 0 ? "不限制" : (currentSec / 60) + " 分钟";
+
+            string pending = "";
+            int typed;
+            if (int.TryParse((_txtTimeout.Text ?? "").Trim(), out typed) && typed >= 0 && typed <= 1440)
+            {
+                string target = typed == 0 ? "不限制" : typed + " 分钟";
+                if (!string.Equals(target, currentText, StringComparison.Ordinal))
+                {
+                    pending = "   -> 保存后改为：" + target;
+                }
+            }
+
+            _txtTimeoutHint.Text =
+                "当前生效：" + currentText + pending + "\n" +
+                "掉线后最多自动重连这么久（期间按 5/15/30/60 秒退避）；用完还连不上就停手、只探测不登录，" +
+                "免得反复骚扰认证设备，等你手动登一次后自动接管。\n" +
+                "填 0 = 不限制；范围 0–1440 分钟；保存后最多 30 秒生效，不用重启。";
+        }
+
+        private void LoadSettingsIntoUi()
+        {
+            CredPair cred = ReadCredential();
+            if (cred != null)
+            {
+                _txtUser.Text = cred.User;
+            }
+
+            int sec = ReadReconnectWindowSec();
+            _txtTimeout.Text = (sec / 60).ToString();
+
+            string title = ToStr(_uiConfig, "title");
+            if (string.IsNullOrWhiteSpace(title)) title = "JNT v2";
+            _txtTitle.Text = title;
+
+            RefreshBackgroundText();
+            UpdateTimeoutHint();
+        }
+
+        private void SaveTitleInline()
+        {
+            string title = (_txtTitle.Text ?? "").Trim();
+            if (title.Length == 0) title = "JNT v2";
+
+            string bg = ToStr(_uiConfig, "background");
+            SaveUiConfig(title, bg);
+            _uiConfig["title"] = title;
+            ApplyAppearance();
+
+            MessageBox.Show(Window, "标题已保存：" + title, "标题",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void PickBackgroundInline()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "选择背景图片",
+                Filter = "图片文件|*.png;*.jpg;*.jpeg;*.bmp;*.webp;*.gif|所有文件|*.*",
+                CheckFileExists = true
+            };
+            if (dialog.ShowDialog() != true) return;
+
+            string ext = Path.GetExtension(dialog.FileName);
+            if (string.IsNullOrEmpty(ext)) ext = ".png";
+            string target = Path.Combine(_exeDir, "bg-custom" + ext);
+            string stored;
+
+            try
+            {
+                foreach (string old in Directory.GetFiles(_exeDir, "bg-custom.*"))
+                {
+                    if (!string.Equals(old, target, StringComparison.OrdinalIgnoreCase))
+                    {
+                        try { File.Delete(old); } catch { }
+                    }
+                }
+                File.Copy(dialog.FileName, target, true);
+                stored = Path.GetFileName(target);
+            }
+            catch
+            {
+                stored = dialog.FileName;   // 复制不了就直接读原路径
+            }
+
+            SaveUiConfig(ToStr(_uiConfig, "title"), stored);
+            _uiConfig["background"] = stored;
+            ApplyBackground(ResolveBackgroundPath());
+            RefreshBackgroundText();
+        }
+
+        private void ResetBackgroundInline()
+        {
+            try
+            {
+                foreach (string old in Directory.GetFiles(_exeDir, "bg-custom.*"))
+                {
+                    try { File.Delete(old); } catch { }
+                }
+            }
+            catch { }
+
+            SaveUiConfig(ToStr(_uiConfig, "title"), "");
+            _uiConfig["background"] = "";
+            ApplyAppearance();
+            RefreshBackgroundText();
+        }
+
+        private void RefreshBackgroundText()
+        {
+            string bg = ToStr(_uiConfig, "background");
+            if (!string.IsNullOrWhiteSpace(bg))
+            {
+                _txtBackground.Text = Path.GetFileName(bg);
+                return;
+            }
+
+            string auto = ResolveBackgroundPath();
+            _txtBackground.Text = string.IsNullOrEmpty(auto)
+                ? "默认（浅色渐变）"
+                : "默认（" + Path.GetFileName(auto) + "）";
+        }
+
+        private void SaveCredentialsInline()
+        {
+            string user = (_txtUser.Text ?? "").Trim();
+            string p1 = _pwdMain.Password ?? "";
+            string p2 = _pwdConfirm.Password ?? "";
+
+            if (user.Length == 0)
+            {
+                MessageBox.Show(Window, "学号不能为空。", "账号", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _txtUser.Focus();
+                return;
+            }
+            if (p1.Length == 0)
+            {
+                MessageBox.Show(Window, "密码不能为空。", "账号", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _pwdMain.Focus();
+                return;
+            }
+            if (p1 != p2)
+            {
+                MessageBox.Show(Window, "两次输入的密码不一致。", "账号", MessageBoxButton.OK, MessageBoxImage.Warning);
+                _pwdConfirm.Focus();
+                return;
+            }
+
+            try
+            {
+                WriteCredential(user, p1);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(Window, "保存失败：" + ex.Message, "账号", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            _pwdMain.Password = "";
+            _pwdConfirm.Password = "";
+            Refresh();
+
+            MessageBoxResult answer = MessageBox.Show(Window,
+                "账号已保存。\n守护进程只在启动时读取账号，需要重启才生效。\n\n现在重启吗？",
+                "账号", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (answer == MessageBoxResult.Yes)
+            {
+                RestartGuard();
             }
         }
 
@@ -384,6 +665,11 @@ namespace JxauGuardUI
                     bool atBottom = _txtLog.VerticalOffset >= maxOffset - 2;
                     _txtLog.Text = tail.TrimEnd('\n');
                     if (atBottom) _txtLog.ScrollToEnd();
+
+                    // 概览页只放最近 8 行，够看个大概
+                    int previewTake = Math.Min(8, lines.Length);
+                    _txtLogPreview.Text = string.Join("\n", lines, lines.Length - previewTake, previewTake).TrimEnd('\n');
+                    _txtLogPreview.ScrollToEnd();
                 }
             }
             catch (Exception ex)
@@ -404,8 +690,7 @@ namespace JxauGuardUI
             }
         }
 
-        public string RunSelfTest()
-        {
+        public string RunSelfTest()        {
             var sb = new StringBuilder();
             sb.AppendLine("ok=true");
             sb.AppendLine("title=" + Window.Title);
@@ -423,8 +708,24 @@ namespace JxauGuardUI
             sb.AppendLine("buttons.start=" + _btnStart.IsEnabled);
             sb.AppendLine("buttons.pause=" + _btnPause.IsEnabled);
             sb.AppendLine("buttons.restart=" + _btnRestart.IsEnabled);
-            sb.AppendLine("buttons.uninstall=" + _btnUninstall.IsEnabled);
-            sb.AppendLine("buttons.clearLog=" + _btnClearLog.IsEnabled);
+            sb.AppendLine("pages.overview=" + (_pageOverview.Visibility == Visibility.Visible));
+            sb.AppendLine("pages.account=" + _pageAccount.Visibility);
+            sb.AppendLine("pages.settings=" + _pageSettings.Visibility);
+
+            // 页面切换自检：五个页面逐个切一遍，确认没有异常
+            try
+            {
+                SetPage(_pageAccount, _navAccount);
+                SetPage(_pageSettings, _navSettings);
+                SetPage(_pageLogs, _navLogs);
+                SetPage(_pageAbout, _navAbout);
+                SetPage(_pageOverview, _navOverview);
+                sb.AppendLine("pageSwitch=ok");
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine("pageSwitch=FAIL " + ex.Message);
+            }
             long logSize = 0;
             try { if (File.Exists(_logPath)) logSize = new FileInfo(_logPath).Length; } catch { }
             sb.AppendLine("logSize=" + logSize);
@@ -433,6 +734,7 @@ namespace JxauGuardUI
             bool autoStart = false;
             try { autoStart = File.Exists(TaskDefinitionPath()); } catch { }
             sb.AppendLine("autoStart=" + autoStart);
+            sb.AppendLine("timeoutSec=" + ReadReconnectWindowSec());
             string log = _txtLog.Text ?? "";
             sb.AppendLine("logLines=" + log.Split('\n').Length);
             return sb.ToString();
@@ -786,7 +1088,6 @@ namespace JxauGuardUI
             if (string.IsNullOrWhiteSpace(title)) title = "JNT v2";
             Window.Title = title;
             _txtHead.Text = title;
-            _txtTitle.Text = title;
 
             ApplyBackground(ResolveBackgroundPath());
         }
@@ -857,78 +1158,6 @@ namespace JxauGuardUI
                 _bgImage.Fill = _defaultBgBrush;
                 _bgOverlay.Fill = new SolidColorBrush(Colors.Transparent);
                 _currentBgPath = null;
-            }
-        }
-
-        private void PickBackground()
-        {
-            var dialog = new OpenFileDialog
-            {
-                Title = "选择背景图片",
-                Filter = "图片文件|*.png;*.jpg;*.jpeg;*.bmp;*.webp;*.gif|所有文件|*.*",
-                CheckFileExists = true
-            };
-            if (dialog.ShowDialog() != true) return;
-
-            string chosen = dialog.FileName;
-            string ext = Path.GetExtension(chosen);
-            if (string.IsNullOrEmpty(ext)) ext = ".png";
-            string target = Path.Combine(_exeDir, "bg-custom" + ext);
-
-            try
-            {
-                foreach (string old in Directory.GetFiles(_exeDir, "bg-custom.*"))
-                {
-                    if (!string.Equals(old, target, StringComparison.OrdinalIgnoreCase))
-                    {
-                        try { File.Delete(old); } catch { }
-                    }
-                }
-                File.Copy(chosen, target, true);
-                ApplyBackground(target);
-                SaveUiConfig(ToStr(_uiConfig, "title"), Path.GetFileName(target));
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "复制到程序目录失败，改成直接读取原路径：\n" + ex.Message,
-                    "校园网守卫", MessageBoxButton.OK, MessageBoxImage.Warning);
-                ApplyBackground(chosen);
-                SaveUiConfig(ToStr(_uiConfig, "title"), chosen);
-            }
-        }
-
-        private void ResetBackground()
-        {
-            try
-            {
-                foreach (string old in Directory.GetFiles(_exeDir, "bg-custom.*"))
-                {
-                    try { File.Delete(old); } catch { }
-                }
-            }
-            catch
-            {
-                // 删不掉不影响显示
-            }
-
-            // 清掉配置后按"默认"重新解析：同目录有 bg.png 就用它，没有就回渐变
-            _uiConfig["background"] = "";
-            ApplyBackground(ResolveBackgroundPath());
-            SaveUiConfig(ToStr(_uiConfig, "title"), "");
-        }
-
-        private void ApplyTitleFromBox()
-        {
-            string title = (_txtTitle.Text ?? "").Trim();
-            if (title.Length == 0) title = "JNT v2";
-
-            Window.Title = title;
-            _txtHead.Text = title;
-
-            if (title != ToStr(_uiConfig, "title"))
-            {
-                SaveUiConfig(title, _currentBgPath == null ? "" : ToStorablePath(_currentBgPath));
             }
         }
 
@@ -1074,11 +1303,17 @@ namespace JxauGuardUI
                     ? "账号解不开（换过 Windows 账户？请重新录入）"
                     : "未录入账号 —— 没有它守护进程无法自动登录";
                 _txtAccount.Foreground = BrushRed;
+
+                _txtCredState.Text = File.Exists(_credPath) ? "凭据解不开，请重新输入" : "还没有录入账号";
+                _txtCredState.Foreground = BrushRed;
             }
             else
             {
                 _txtAccount.Text = "账号：" + cred.User + "（密码已用 Windows DPAPI 加密，只存本机）";
                 _txtAccount.Foreground = BrushNormal;
+
+                _txtCredState.Text = "当前账号：" + cred.User + "（密码已加密保存）";
+                _txtCredState.Foreground = BrushGreen;
             }
         }
 
@@ -1099,19 +1334,22 @@ namespace JxauGuardUI
             {
                 _txtScript.Text = _scriptDir;
                 _txtScript.Foreground = BrushNormal;
-                _btnPickScript.Content = "更换脚本目录…";
+                _txtScriptDetail.Text = "guard.ps1 和 launch.vbs 都在这里，状态正常。";
+                _txtScriptDetail.Foreground = BrushGreen;
             }
             else if (_scriptOk)
             {
                 _txtScript.Text = _scriptDir + "（缺 launch.vbs）";
                 _txtScript.Foreground = BrushAmber;
-                _btnPickScript.Content = "更换脚本目录…";
+                _txtScriptDetail.Text = "这个目录有 guard.ps1，但缺少 launch.vbs，启动会失败。建议整份脚本一起复制。";
+                _txtScriptDetail.Foreground = BrushAmber;
             }
             else
             {
-                _txtScript.Text = "没找到 guard.ps1 —— 把界面放进脚本目录，或点右边指定";
+                _txtScript.Text = "没找到 guard.ps1 —— 用下面的「指定目录…」选一下";
                 _txtScript.Foreground = BrushRed;
-                _btnPickScript.Content = "指定脚本目录…";
+                _txtScriptDetail.Text = "界面需要和脚本放在同一个文件夹，或者手动指定 guard.ps1 所在的目录。";
+                _txtScriptDetail.Foreground = BrushRed;
             }
         }
 
@@ -1163,13 +1401,15 @@ namespace JxauGuardUI
             {
                 _txtAutoStart.Text = "已启用 —— 登录 Windows 后自动在后台运行";
                 _txtAutoStart.Foreground = BrushGreen;
-                _btnInstall.Content = "重新安装自启";
+                _txtAutoStartDetail.Text = "计划任务 CampusNetGuard 已注册。登录 Windows 后会自动在后台运行，不用打开这个窗口。";
+                _txtAutoStartDetail.Foreground = BrushGreen;
             }
             else
             {
                 _txtAutoStart.Text = "未启用 —— 只能手动启动，关机后不会自动运行";
                 _txtAutoStart.Foreground = BrushRed;
-                _btnInstall.Content = "安装开机自启";
+                _txtAutoStartDetail.Text = "还没有注册计划任务。点右边的按钮装一下（会弹 UAC），装完就开机自启；顺带会关掉 Windows 开机自动弹认证页。";
+                _txtAutoStartDetail.Foreground = BrushNormal;
             }
         }
 
@@ -1182,7 +1422,7 @@ namespace JxauGuardUI
                     "开机自启", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (ask == MessageBoxResult.Yes)
                 {
-                    EditCredentials();
+                    SetPage(_pageAccount, _navAccount);
                 }
                 return;
             }
@@ -1241,218 +1481,6 @@ namespace JxauGuardUI
 
             Refresh();
         }
-
-        private void EditCredentials()
-        {
-            CredPair existing = ReadCredential();
-
-            var dialog = new Window
-            {
-                Title = "录入校园网账号",
-                Width = 440,
-                Height = 300,
-                ResizeMode = ResizeMode.NoResize,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                Owner = Window,
-                Background = new SolidColorBrush(Color.FromRgb(0xF4, 0xF7, 0xFC)),
-                FontFamily = new FontFamily("Microsoft YaHei UI"),
-                FontSize = 13,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x1F, 0x29, 0x37)),
-                ShowInTaskbar = false
-            };
-
-            var layout = new Grid { Margin = new Thickness(22, 18, 22, 16) };
-            for (int i = 0; i < 4; i++)
-            {
-                layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            }
-            layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            layout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(74) });
-            layout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-            Func<string, int, TextBox> addBox = (label, row) =>
-            {
-                var caption = new TextBlock
-                {
-                    Text = label,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Foreground = new SolidColorBrush(Color.FromRgb(0x64, 0x74, 0x8B)),
-                    Margin = new Thickness(0, 0, 0, 10)
-                };
-                Grid.SetRow(caption, row);
-                Grid.SetColumn(caption, 0);
-                layout.Children.Add(caption);
-
-                var box = new TextBox
-                {
-                    Margin = new Thickness(0, 0, 0, 10),
-                    Padding = new Thickness(10, 7, 10, 7),
-                    BorderBrush = new SolidColorBrush(Color.FromRgb(0xD8, 0xE0, 0xEC)),
-                    BorderThickness = new Thickness(1),
-                    Background = Brushes.White,
-                    CaretBrush = new SolidColorBrush(Color.FromRgb(0x1F, 0x29, 0x37))
-                };
-                Grid.SetRow(box, row);
-                Grid.SetColumn(box, 1);
-                layout.Children.Add(box);
-                return box;
-            };
-
-            TextBox txtUser = addBox("学号", 0);
-            if (existing != null) txtUser.Text = existing.User;
-
-            var labelPwd = new TextBlock
-            {
-                Text = "密码",
-                VerticalAlignment = VerticalAlignment.Center,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x64, 0x74, 0x8B)),
-                Margin = new Thickness(0, 0, 0, 10)
-            };
-            Grid.SetRow(labelPwd, 1);
-            Grid.SetColumn(labelPwd, 0);
-            layout.Children.Add(labelPwd);
-
-            var pwdBox = new PasswordBox
-            {
-                Margin = new Thickness(0, 0, 0, 10),
-                Padding = new Thickness(10, 7, 10, 7),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0xD8, 0xE0, 0xEC)),
-                BorderThickness = new Thickness(1),
-                Background = Brushes.White
-            };
-            Grid.SetRow(pwdBox, 1);
-            Grid.SetColumn(pwdBox, 1);
-            layout.Children.Add(pwdBox);
-
-            var labelPwd2 = new TextBlock
-            {
-                Text = "确认",
-                VerticalAlignment = VerticalAlignment.Center,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x64, 0x74, 0x8B)),
-                Margin = new Thickness(0, 0, 0, 10)
-            };
-            Grid.SetRow(labelPwd2, 2);
-            Grid.SetColumn(labelPwd2, 0);
-            layout.Children.Add(labelPwd2);
-
-            var pwdBox2 = new PasswordBox
-            {
-                Margin = new Thickness(0, 0, 0, 10),
-                Padding = new Thickness(10, 7, 10, 7),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0xD8, 0xE0, 0xEC)),
-                BorderThickness = new Thickness(1),
-                Background = Brushes.White
-            };
-            Grid.SetRow(pwdBox2, 2);
-            Grid.SetColumn(pwdBox2, 1);
-            layout.Children.Add(pwdBox2);
-
-            var hint = new TextBlock
-            {
-                Text = "密码用 Windows DPAPI 加密后存在本机，只有当前 Windows 账户能解开；不会上传到任何地方。",
-                TextWrapping = TextWrapping.Wrap,
-                FontSize = 11,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x94, 0xA3, 0xB8))
-            };
-            Grid.SetRow(hint, 3);
-            Grid.SetColumn(hint, 0);
-            Grid.SetColumnSpan(hint, 2);
-            layout.Children.Add(hint);
-
-            var buttons = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Bottom,
-                Margin = new Thickness(0, 14, 0, 0)
-            };
-            Grid.SetRow(buttons, 4);
-            Grid.SetColumn(buttons, 0);
-            Grid.SetColumnSpan(buttons, 2);
-            layout.Children.Add(buttons);
-
-            var cancel = new Button
-            {
-                Content = "取消",
-                Width = 88,
-                Padding = new Thickness(0, 6, 0, 6),
-                Margin = new Thickness(0, 0, 8, 0)
-            };
-            cancel.Click += (s, e) => dialog.DialogResult = false;
-
-            var save = new Button
-            {
-                Content = "保存",
-                Width = 88,
-                Padding = new Thickness(0, 6, 0, 6),
-                Background = new SolidColorBrush(Color.FromRgb(0x3D, 0x7B, 0xFA)),
-                Foreground = Brushes.White,
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0x3D, 0x7B, 0xFA))
-            };
-
-            save.Click += (s, e) =>
-            {
-                string user = (txtUser.Text ?? "").Trim();
-                string p1 = pwdBox.Password ?? "";
-                string p2 = pwdBox2.Password ?? "";
-
-                if (user.Length == 0)
-                {
-                    MessageBox.Show(dialog, "学号不能为空。", "录入账号",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    txtUser.Focus();
-                    return;
-                }
-                if (p1.Length == 0)
-                {
-                    MessageBox.Show(dialog, "密码不能为空。", "录入账号",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    pwdBox.Focus();
-                    return;
-                }
-                if (p1 != p2)
-                {
-                    MessageBox.Show(dialog, "两次输入的密码不一致。", "录入账号",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    pwdBox2.Focus();
-                    return;
-                }
-
-                try
-                {
-                    WriteCredential(user, p1);
-                    dialog.DialogResult = true;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(dialog, "保存失败：" + ex.Message, "录入账号",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            };
-
-            buttons.Children.Add(cancel);
-            buttons.Children.Add(save);
-
-            dialog.Content = layout;
-            dialog.Loaded += (s, e) => { txtUser.Focus(); txtUser.SelectAll(); };
-
-            bool? saved = dialog.ShowDialog();
-            if (saved != true) return;
-
-            RefreshAccount();
-
-            var answer = MessageBox.Show(
-                "账号已保存（密码用 Windows DPAPI 加密，只存本机）。\n\n" +
-                "守护进程只在启动时读取账号，需要重启才会用新账号登录。\n现在重启吗？",
-                "录入账号", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (answer == MessageBoxResult.Yes)
-            {
-                RestartGuard();
-            }
-        }
-
-        // ---------------------------------------------------------------- 状态读取
 
         private int CurrentPid()
         {
