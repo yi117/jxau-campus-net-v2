@@ -119,6 +119,10 @@ if (-not $Phase2) {
             maxLoginPer10Min         = 6
             loginPauseSec            = 600
             wifiReconnectCooldownSec = 300
+            # 掉线后自动重连的时间预算（秒）；0 = 不限制。界面里可以改
+            reconnectWindowSec       = 300
+            # 认证页要验证码时，先刷新会话再试几次；0 = 不刷直接等人工
+            captchaRefreshTries      = 2
             keepaliveFallbackMin     = 5
             portalHost               = '10.255.240.8'
             portalPort               = 80
